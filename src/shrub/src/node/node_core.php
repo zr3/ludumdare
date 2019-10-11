@@ -261,7 +261,7 @@ function node_GetById( $ids ) {
 				version,
 				slug, name, body
 			FROM ".SH_TABLE_PREFIX.SH_TABLE_NODE."
-			WHERE id IN ($ids_string);"
+			WHERE id IN ($ids_string) AND trashed IS NULL;"
 		);
 
 		if ( $multi )
@@ -298,7 +298,7 @@ function node_GetNoBodyById( $ids ) {
 				version,
 				slug, name
 			FROM ".SH_TABLE_PREFIX.SH_TABLE_NODE."
-			WHERE id IN ($ids_string);"
+			WHERE id IN ($ids_string) AND trashed IS NULL;"
 		);
 
 		if ( $multi )
@@ -330,7 +330,7 @@ function node_CountByParentAuthorType( $parent = null, $superparent = null, $aut
 			COUNT(id)
 		FROM
 			".SH_TABLE_PREFIX.SH_TABLE_NODE."
-		".dbQuery_MakeQuery($QUERY)."
+		".dbQuery_MakeQuery($QUERY)." AND trashed IS NULL
 		LIMIT 1
 		;",
 		...$ARGS
@@ -556,6 +556,19 @@ function node_Publish( $node, $state = true ) {
 	);
 }
 
+function node_Trash( $node, $state = true ) {
+	if ( $state ) {
+		return db_QueryUpdate(
+			"UPDATE ".SH_TABLE_PREFIX.SH_TABLE_NODE."
+			SET
+				trashed=NOW(),
+				modified=NOW()
+			WHERE
+				id=?;",
+			$node
+		);
+	}
+}
 
 
 function node_IdToIndex( $nodes ) {

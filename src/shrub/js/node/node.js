@@ -16,6 +16,7 @@ export default {
 	Add,
 	Update,
 	Publish,
+	Trash,
 
 	Transform,
 
@@ -349,6 +350,14 @@ export function Update( id, name, body, tag ) {
 		Data.tag = tag;
 
 	return Fetch.Post(API_ENDPOINT+'/vx/node/update/'+id, Data)
+		.then( r => {
+			InvalidateNodeCache(id);
+			return r;
+		});
+}
+
+export function Trash( id ) {
+	return Fetch.Post(API_ENDPOINT+'/vx/node/trash/'+id, {})
 		.then( r => {
 			InvalidateNodeCache(id);
 			return r;

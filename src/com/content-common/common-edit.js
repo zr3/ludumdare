@@ -1,4 +1,4 @@
-import { h, Component } 				from 'preact/preact';
+import { h, Component }					from 'preact/preact';
 
 import SVGIcon 							from 'com/svg-icon/icon';
 import ButtonBase 						from 'com/button-base/base';
@@ -19,6 +19,7 @@ export default class ContentCommonEdit extends Component {
 		var ShowPreview = null;
 		var ShowSave = null;
 		var ShowPublish = null;
+		var ShowDelete = null;
 
 		if ( props.editing ) {
 			ShowEdit = <ButtonBase class="-selected"><SVGIcon>edit</SVGIcon><div class="if-sidebar-block">Edit</div></ButtonBase>;
@@ -46,9 +47,14 @@ export default class ContentCommonEdit extends Component {
 			// Otherwise, published is null, so publish button is not shown
 		}
 
+		if (props.istrashable ) {
+			ShowDelete = <ButtonBase class="-available -trash" onclick={props.ontrash}><SVGIcon>trash</SVGIcon><div class="if-sidebar-block">Trash</div></ButtonBase>;
+		}
+
 		return (
 			<div class="content-common-body -edit">
 				<div class="-right">
+					{ShowDelete}
 					{ShowSave}
 					{ShowPublish}
 				</div>

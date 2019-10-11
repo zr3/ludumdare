@@ -40,6 +40,7 @@ export default class ContentSimple extends Component {
 
 		this.onEdit = this.onEdit.bind(this);
 		this.onPreview = this.onPreview.bind(this);
+		this.onTrash = this.onTrash.bind(this);
 		this.onSave = this.onSave.bind(this);
 		this.onPublish = this.onPublish.bind(this);
 		this.onDone = this.onDone.bind(this);
@@ -268,6 +269,22 @@ export default class ContentSimple extends Component {
 			window.location.hash = "#error-publish/"+encodeURI(err.message);
 		});
 	}
+	onTrash( e ) {
+		// DEFINITELY TODO: Confirm
+		return $Node.Trash(this.props.node.id)
+			.then(r => {
+				if (r.trashed) {
+					window.location.href = r.path;
+				} else {
+					throw new Error("received response but node was not trashed");
+				}
+			})
+			.catch(err => {
+				console.log(err);
+				this.setState({'error': err});
+				window.location.hash = "#error-trash/"+encodeURI(err.message);
+			});
+	}
 
 	onDone( e ) {
 		if ( this.state.modified ) {
@@ -338,9 +355,11 @@ export default class ContentSimple extends Component {
 					'published': !!node.published,
 					'onedit': this.onEdit,
 					'onpreview': this.onPreview,
+					'ontrash': this.onTrash,
 					'onsave': this.onSave,
 					'onpublish': this.onPublish,
 					'ondone': this.onDone,
+					'istrashable': !node.published && (node.type === 'post' || (node.type === 'item' && node.subtype === 'game'))
 				};
 
 				EditProps.nopublish = props.nopublish;

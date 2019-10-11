@@ -845,6 +845,48 @@ switch ( $action ) {
 		}
 		break; //case 'publish': //node/publish
 
+	case 'trash': //node/trash/:node_id
+		json_ValidateHTTPMethod('POST');
+
+		if ( $user_id = userAuth_GetID() ) {
+			$node_id = intval(json_ArgShift());
+			if ( empty($node_id) ) {
+				json_EmitFatalError_BadRequest(null, $RESPONSE);
+			}
+
+			// Fetch Node
+			$node = nodeComplete_GetById($node_id);
+			if ( !$node ) {
+				json_EmitFatalError_BadRequest("Already trashed", $RESPONSE);
+			}
+			if ( $node['type'] != 'post' && ($node['type'] != 'item' || $node['subtype'] != 'game')) {
+				json_EmitFatalError_BadRequest("Can only trash posts or games", $RESPONSE);
+			}
+			if ( $node['published']) {
+				json_EmitFatalError_BadRequest("Cannot trash published nodes", $RESPONSE);
+			}
+
+			// If you are authorized to edit
+			if ( node_IsAuthor($node, $user_id) ) {
+				$RESPONSE['trashed'] = node_Trash(
+					$node_id
+				);
+
+				nodeCache_InvalidateById($node_id);
+
+				if ( $RESPONSE['trashed'] ) {
+					$RESPONSE['path'] = "/";
+				}
+			}
+			else {
+				json_EmitFatalError_Permission(null, $RESPONSE);
+			}
+		}
+		else {
+			json_EmitFatalError_Permission(null, $RESPONSE);
+		}
+		break; //case 'trash': //node/trash
+
 	case 'love': //node/love/...
 		$old_action = $action;
 		$action = json_ArgShift();
